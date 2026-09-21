@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spreker Flipklok Timer</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- iOS Web App optimalisaties voor beginscherm -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Speaker Timer">
+    <meta name="theme-color" content="#121417">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="theme-dark">
+    <div id="timer-container">
+
+        <!-- Bovenste status / instellingen balk -->
+        <div id="top-settings">
+            <div class="custom-select-wrapper">
+                <select id="themeSelect" onchange="changeTheme(this.value)" aria-label="Selecteer thema">
+                    <option value="theme-stage">Thema: Podium (Puur Zwart)</option>
+                    <option value="theme-dark" selected>Thema: Donker</option>
+                    <option value="theme-bright">Thema: Bright (Licht)</option>
+                </select>
+            </div>
+
+            <div class="custom-select-wrapper">
+                <select id="warningSelect" onchange="onWarningChanged()" aria-label="Selecteer waarschuwingstijd">
+                    <option value="120">Waarschuwing: 2 Min (120s)</option>
+                    <option value="90">Waarschuwing: 1.5 Min (90s)</option>
+                    <option value="60" selected>Waarschuwing: 1 Min (60s)</option>
+                    <option value="45">Waarschuwing: 45 Sec</option>
+                    <option value="30">Waarschuwing: 30 Sec</option>
+                    <option value="15">Waarschuwing: 15 Sec</option>
+                    <option value="0">Geen Waarschuwing</option>
+                </select>
+            </div>
+
+            <button id="fullscreenButton" class="icon-btn" onclick="toggleFullscreen()" title="Volledig Scherm (F of F11)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                </svg>
+                <span id="fullscreenText">Volledig Scherm</span>
+            </button>
+        </div>
+
+        <!-- Flipklok weergave -->
+        <div id="flip-clock">
+            <!-- Minuten Flap -->
+            <div class="flip-unit" id="unit-minutes">
+                <div class="stepper-controls top">
+                    <button class="stepper-btn" onclick="adjustMinutes(5)" title="+5 Minuten">+5m</button>
+                    <button class="stepper-btn" onclick="adjustMinutes(1)" title="+1 Minuut">+1m</button>
+                </div>
+                <div class="flip-card-wrapper">
+                    <div class="flip-card" id="card-minutes">
+                        <div class="card-face" id="minutes-display">05</div>
+                        <div class="card-hinge left"></div>
+                        <div class="card-hinge right"></div>
+                        <div class="card-divider"></div>
+                    </div>
+                </div>
+                <div class="stepper-controls bottom">
+                    <button class="stepper-btn" onclick="adjustMinutes(-1)" title="-1 Minuut">-1m</button>
+                    <button class="stepper-btn" onclick="adjustMinutes(-5)" title="-5 Minuten">-5m</button>
+                </div>
+                <div class="unit-label">MINUTEN</div>
+            </div>
+
+            <!-- Dubbele Punt Scheider -->
+            <div class="flip-colon">
+                <span class="colon-dot"></span>
+                <span class="colon-dot"></span>
+            </div>
+
+            <!-- Seconden Flap -->
+            <div class="flip-unit" id="unit-seconds">
+                <div class="stepper-controls top">
+                    <button class="stepper-btn" onclick="adjustSeconds(15)" title="+15 Seconden">+15s</button>
+                    <button class="stepper-btn" onclick="adjustSeconds(5)" title="+5 Seconden">+5s</button>
+                </div>
+                <div class="flip-card-wrapper">
+                    <div class="flip-card" id="card-seconds">
+                        <div class="card-face" id="seconds-display">00</div>
+                        <div class="card-hinge left"></div>
+                        <div class="card-hinge right"></div>
+                        <div class="card-divider"></div>
+                    </div>
+                </div>
+                <div class="stepper-controls bottom">
+                    <button class="stepper-btn" onclick="adjustSeconds(-5)" title="-5 Seconden">-5s</button>
+                    <button class="stepper-btn" onclick="adjustSeconds(-15)" title="-15 Seconden">-15s</button>
+                </div>
+                <div class="unit-label">SECONDEN</div>
+            </div>
+        </div>
+
+        <!-- Handmatige Invoer & Snelle Presets -->
+        <div id="presets-panel">
+            <div class="preset-pills">
+                <button class="preset-pill" onclick="setTimePreset(30)">30s</button>
+                <button class="preset-pill" onclick="setTimePreset(60)">1m</button>
+                <button class="preset-pill" onclick="setTimePreset(180)">3m</button>
+                <button class="preset-pill active" onclick="setTimePreset(300)">5m</button>
+                <button class="preset-pill" onclick="setTimePreset(600)">10m</button>
+                <button class="preset-pill" onclick="setTimePreset(900)">15m</button>
+                <button class="preset-pill" onclick="setTimePreset(1200)">20m</button>
+                <button class="preset-pill" onclick="setTimePreset(1800)">30m</button>
+                <button class="preset-pill" onclick="setTimePreset(2700)">45m</button>
+                <button class="preset-pill" onclick="setTimePreset(3600)">60m</button>
+            </div>
+
+            <div class="custom-time-input">
+                <span class="input-label">Direct instellen:</span>
+                <div class="input-group">
+                    <input type="number" id="inputMinutes" min="0" max="999" value="5" onchange="onDirectInputChange()">
+                    <span class="input-suffix">m</span>
+                </div>
+                <div class="input-group">
+                    <input type="number" id="inputSeconds" min="0" max="59" step="5" value="0" onchange="onDirectInputChange()">
+                    <span class="input-suffix">s</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hoofd Actieknoppen -->
+        <div id="action-controls">
+            <button id="startButton" class="btn btn-primary" onclick="startTimer()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                <span>Start</span>
+            </button>
+
+            <button id="pauseButton" class="btn btn-secondary" onclick="togglePause()" disabled>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="6" y="4" width="4" height="16"/>
+                    <rect x="14" y="4" width="4" height="16"/>
+                </svg>
+                <span id="pauseText">Pauze</span>
+            </button>
+
+            <button id="resetButton" class="btn btn-secondary" onclick="resetTimer()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                </svg>
+                <span>Reset</span>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Aflopende voortgangsbalk onderaan -->
+    <div id="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+
+    <div id="footer-text">
+        another #staalvaes production
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
