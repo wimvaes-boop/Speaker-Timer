@@ -137,8 +137,6 @@ function adjustSeconds(delta) {
  */
 function setTimePreset(seconds) {
     if (isRunning) {
-        const confirmChange = confirm("Timer loopt momenteel. Wil je resetten naar deze tijd?");
-        if (!confirmChange) return;
         resetTimer();
     }
 
@@ -164,7 +162,7 @@ function updatePresetPillState(seconds) {
 }
 
 /**
- * Als de gebruiker handmatig getallen intypt in de inputvakjes.
+ * Als de gebruiker handmatig getallen intypt in de inputvakjes (monkeyproof invoerbeveiliging).
  */
 function onDirectInputChange() {
     let mins = parseInt(inputMinutes.value, 10);
@@ -172,14 +170,18 @@ function onDirectInputChange() {
 
     if (isNaN(mins) || mins < 0) mins = 0;
     if (isNaN(secs) || secs < 0) secs = 0;
+    if (mins > 999) mins = 999;
     if (secs > 59) {
         mins += Math.floor(secs / 60);
         secs = secs % 60;
     }
 
     if (mins === 0 && secs === 0) {
-        mins = 1;
+        secs = 30; // Minimaal 30 seconden als alles leeg/0 is ingevoerd
     }
+
+    inputMinutes.value = mins;
+    inputSeconds.value = secs;
 
     const newTotal = (mins * 60) + secs;
     totalTime = newTotal;
@@ -195,8 +197,10 @@ function onDirectInputChange() {
 function startTimer() {
     clearInterval(timerInterval);
 
+    // Als de timer op 0 staat, herstarten vanaf de ingestelde begintijd
     if (timeRemaining <= 0) {
-        onDirectInputChange();
+        timeRemaining = totalTime > 0 ? totalTime : 300;
+        totalTime = timeRemaining;
     }
 
     isRunning = true;
@@ -231,6 +235,9 @@ function startTimer() {
 function togglePause() {
     if (!isRunning) return;
 
+    // Altijd bestaande interval opruimen om memory-leaks of dubbele loops te voorkomen
+    clearInterval(timerInterval);
+
     if (isPaused) {
         isPaused = false;
         pauseText.textContent = 'Pauze';
@@ -253,7 +260,6 @@ function togglePause() {
         isPaused = true;
         pauseText.textContent = 'Hervatten';
         document.body.classList.remove('is-running');
-        clearInterval(timerInterval);
     }
 }
 

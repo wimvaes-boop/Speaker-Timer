@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 Spreker Flipklok Timer - Standalone Desktop Applicatie
 another #staalvaes production
@@ -602,13 +602,18 @@ class SpeakerTimerApp:
         if self.timer_job:
             self.root.after_cancel(self.timer_job)
 
+        # Als de timer afgelopen is (op 0 staat), herstarten met de ingestelde tijd
+        if self.time_remaining <= 0:
+            self.time_remaining = self.total_seconds if self.total_seconds > 0 else 300
+            self.total_seconds = self.time_remaining
+
         self.is_running = True
         self.is_paused = False
 
         self.start_btn.pack_forget()
         self.pause_btn.configure(text=" ⏸ Pauze ", state=tk.NORMAL)
         self.update_display()
-        self.run_clock()
+        self.timer_job = self.root.after(1000, self.run_clock)
 
     def run_clock(self):
         if not self.is_running or self.is_paused:
@@ -633,7 +638,7 @@ class SpeakerTimerApp:
         if self.is_paused:
             self.is_paused = False
             self.pause_btn.configure(text=" ⏸ Pauze ")
-            self.run_clock()
+            self.timer_job = self.root.after(1000, self.run_clock)
         else:
             self.is_paused = True
             self.pause_btn.configure(text=" ▶ Hervatten ")
@@ -662,7 +667,7 @@ class SpeakerTimerApp:
         else:
             self.fs_btn.configure(text="Volledig Scherm")
             self.presets_frame.pack(fill=tk.X, padx=15, pady=(2, 8), before=self.action_frame)
-            self.footer_label.pack(pady=(0, 6), before=self.progress_canvas)
+            self.footer_label.pack(pady=(0, 6))
 
         # Forceer directe schaal-update voor fullscreen / venster
         self.root.after(30, self.apply_resize)
